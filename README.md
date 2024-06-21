@@ -35,6 +35,7 @@ this is how the tree in my database look like. I use the Realtime-database and t
 
 ### Web Hosting
 For those who have no idea how to host the website for your project I'd like to recommend firebase for beginner because it's so easy to use it and since if you're not considering to use it in production there's no need to worry about fees so if you want to try I'll put link below here.
+
 >**[Firebase Get started with Hosting](https://firebase.google.com/docs/hosting/quickstart?hl=en&authuser=0)**
 ### Tips for Firebase Docs
 For those who struggling with some examples in Docs. Well it's seem like some of those examples were deprecated so it might not function as it should so it take more time to scroll through some blog such as **Stack Overflow**.
