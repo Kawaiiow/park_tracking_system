@@ -20,6 +20,7 @@ The IoT system I can't go deep down much but I'm gonna leave some reference to t
 **[FirebaseClient](https://github.com/mobizt/FirebaseClient)**
 
 List about what you need in order to make the detection system.
+
 ***NOTE It's only to demonstrate the flows of collecting the data and send it to database.**
 >* NodeMCU ESP8266
 >* 2x hc-sr04 ultrasonic sensor (any others variants can be replace)
