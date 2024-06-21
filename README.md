@@ -33,6 +33,7 @@ For those who have no idea how to host the website for your project I'd like to 
 >**[Firebase Get started with Hosting](https://firebase.google.com/docs/hosting/quickstart?hl=en&authuser=0)**
 ### Tips for Firebase Docs
 For those who struggling with some examples in Docs. Well it's seem like some of those examples were deprecated so it might not function as it should so it take more time to scroll through some blog such as **Stack Overflow**.
+
 ***NOTE : it might be fix right now but I haven't check it yet since I've change to do C I got no bussiness with Firebase anymore.**
 
 ## Principal concept of how webpage working
