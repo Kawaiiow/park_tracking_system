@@ -1,204 +1,80 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  child,
-  get,
-  onChildChanged,
-} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-database.js";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 /*
- * DISCLAIMER
- * Due to the deadline of my project so this config is a quick setup
- * for testing and demonstration. PLEASE don't try this on real productaion
- * it's not secure for your database because it's vulnurable information
- * of your database which anyone can use this to access it.
+ * This's version I implemented with JQuery also separate and rewrite some process into function
+ * that occur in many function.
  * 
- * For anyone who want to try this one please create your own firebase project
- * and replace all the REDACT with your own configuration.
+ * * NOTE! : 
+ *  This would've been last version to be improve from conversation with my dev friend
+ *  the conclusion was I should rebase this project with new infastructure so I can push the limit further.
 */
-const firebaseConfig = {
-    apiKey: "REDACT",
-    authDomain: "REDACT",
-    databaseURL: "REDACT",
-    projectId: "REDACT",
-    storageBucket: "REDACT",
-    messagingSenderId: "REDACT",
-    appId: "REDACT",
-    measurementId: "REDACT"
-}
+import {
+  init_database,
+  get_dbref,
+  get_root,
+  get_child,
+  incld_change_listener
+} from "./helper.js";
+
 // Initialize Firebase
+const db = init_database();
+const dbRef = get_dbref(db);
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const dbRef = ref(getDatabase());
-
-let ListContainer = document.querySelector("#ListContainer");
-let nav = document.querySelector("#navbar");
-// let refresh_btn = document.getElementById('refresh_btn')
-let slotLimit = 0;
-let inUsed = 0;
+let ListContainer = $("#ListContainer");
+let nav = $("#navbar");
 let selector;
 
-// REFRESH BUTTON
+/* REFRESH BUTTON : 
+ *It's not necessary now because the list will update itself
+ *by the onChlidchange function.
+*/
+// $("#refresh_btn").click(function() {
+//   $(ListContainer).empty();
+//   get_child(dbRef, selector, parkRender);
+// });
 
-// refresh_btn.onclick = function(){
-//   while (ListContainer.firstChild) {
-//     ListContainer.removeChild(ListContainer.firstChild);
-//   }
-//   get(child(dbRef, selector))
-//     .then((snapshot) => {
-//       if (snapshot.exists()) {
-//         // slotLimit = Object.keys(snapshot.val()).length;
-//         // inUsed = Object.values(snapshot.val()).filter((value) => value === false).length;
-//         // console.log(slotLimit, inUsed);
-
-//         snapshot.forEach((index) => {
-//           parkRender(index);
-//         });
-//       } else {
-//         console.log("No data available");
-//       }
-//     })
-//     .catch((error) => {
-//       console.error(error);
-//     });
-// }
-
-// Call when open thhe website
-
-const homeRender = () => {
-  get(dbRef).then((snapshot) => {
-      if (snapshot.exists()) {
-        snapshot.forEach((place) => {placeRender(place);});
-      } else {
-        console.log("No data available");
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
-};
-
-//Render first place
+//Render place
 
 const placeRender = (root) => {
-  let li = document.createElement("li");
-  let name = document.createElement("span");
-
-  li.setAttribute("id", root.key);
-  li.setAttribute("class", 'place');
-
-  name.textContent = root.key;
-  li.appendChild(name);
-
-  li.addEventListener('click',function() {
+  let li = $("<li></li>").attr({"id" : root.key, "class" : "place"});
+  let name = $(`<span>${root.key}</span>`);
+  $(li).append(name);
+  
+  $(li).click( function() {
     selector = this.id;
-    let back_btn = document.createElement("p");
-    let head = document.createElement("h2")
-    document.getElementById('header').style.display = 'none'
-    // refresh_btn.style.display = 'initial'
+    let back_btn = $("<p>back</p>");
+    let head = $(`<h2>${selector}</h2>`);
+    $('#header').css("display", 'none');
+    $('#refresh_btn').css("display", 'initial');
+    
+    $(ListContainer).empty();
+    get_child(dbRef, selector, parkRender);
+    incld_change_listener(db, selector);
 
-    back_btn.textContent = "back";
-    head.textContent = selector;
-
-    back_btn.addEventListener('click' , function() {
-      while (ListContainer.firstChild) {
-        ListContainer.removeChild(ListContainer.firstChild);
-      }
-      while (nav.firstChild) {
-        nav.removeChild(nav.firstChild);
-      }
-
-      // off('child_changed', dbRef);
-      update();
-
-      homeRender()
-      document.getElementById('header').style.display = 'block'
-      // refresh_btn.style.display = 'none'
+    $(back_btn).click(() => {
+      $(ListContainer).empty();
+      $(nav).empty();
+      $('#refresh_btn').css("display", 'none');
+      $('#header').css("display", 'block');
+      Main();
     });
 
-    nav.appendChild(head)
-    nav.appendChild(back_btn);
-
-    // console.log();
-    // getData(selector);
-    while (ListContainer.firstChild) {
-      ListContainer.removeChild(ListContainer.firstChild);
-    }
-    get(child(dbRef, selector)).then((snapshot) => {
-      if (snapshot.exists()) {
-        // slotLimit = Object.keys(snapshot.val()).length;
-        // inUsed = Object.values(snapshot.val()).filter((value) => value === false).length;
-        // console.log(slotLimit, inUsed);
-
-        snapshot.forEach((index) => {
-          parkRender(index);
-        });
-      } else {
-        console.log("No data available");
-      }
-    }).catch((error) => {
-        console.error(error);
-    });
-
-    const update = onChildChanged(ref(db, selector), (snapshot) => {
-      const childKey = snapshot.key;
-      const childData = snapshot.val();
-
-      let li = document.getElementById(childKey);
-      li.setAttribute("class", childData);
-      console.log("changed",snapshot.key , snapshot.val() , selector);
-    });
+    $(nav).append(head)
+    $(nav).append(back_btn);
   });
 
-
-  ListContainer.appendChild(li);
+  $(ListContainer).append(li);
 };
 
 const parkRender = (index) => {
-  let li = document.createElement("li");
-  let slotName = document.createElement("span");
-
-  li.setAttribute("id", index.key);
-  li.setAttribute("class", index.val());
-  
-  slotName.textContent = index.key;
-  slotName.style.padding = '2rem 3rem 2rem 3rem'
-  li.appendChild(slotName);
-  
-  ListContainer.appendChild(li);
+  let li = $("<li></li>").attr({"id" : index.key, "class" : index.val() });
+  let slotName = $("<span></span>").text(index.key).css("padding", "2rem 3rem 2rem 3rem");
+  $(li).append(slotName);
+  $(ListContainer).append(li);
 };
 
-//FOR CHECKING OUTPUT
+//Call when open the website
 
-const getData = (id) => {
-  get(child(dbRef, id))
-    .then((snapshot) => {
-      if (snapshot.exists()) {
-        console.log(snapshot.val());
-      } else {
-        console.log("No data available");
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-    });
+const Main = () => {
+  get_root(dbRef, placeRender);
 };
 
-homeRender();
-
-// get(child(dbRef, `BK000`)).then((snapshot) => {
-//     if (snapshot.exists()) {
-//         console.log(snapshot.val());
-//     } else {
-//         console.log("No data available");
-//     }
-// }).catch((error) => {
-//     console.error(error);
-// });
+Main();
